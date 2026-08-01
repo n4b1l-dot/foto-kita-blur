@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+</html>/
+<head>
+
+<style>
+/* =========================
+   RESET
+========================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, Helvetica, sans-serif;
+    background:#0f172a;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    overflow:hidden;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
+.container{
+    width:95%;
+    max-width:450px;
+    text-align:center;
+}
+
+h1{
+    margin-bottom:10px;
+    font-size:30px;
+}
+
+.info{
+    color:#cbd5e1;
+    margin-bottom:20px;
+}
+
+/* =========================
+   CAMERA BOX
+========================= */
+
+.camera-box{
+    position:relative;
+    width:100%;
+    aspect-ratio:3/4;
+    border-radius:20px;
+    overflow:hidden;
+    background:#000;
+    box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+video,
+canvas{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+}
+
+canvas{
+    display:none;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+#status{
+    position:absolute;
+    bottom:15px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,.6);
+    padding:8px 18px;
+    border-radius:25px;
+    font-size:14px;
+    backdrop-filter:blur(8px);
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.buttons{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    margin-top:20px;
+}
+
+button{
+    padding:13px 22px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    color:white;
+    font-size:16px;
+    transition:.3s;
+}
+
+#capture{
+    background:#2563eb;
+}
+
+#capture:hover{
+    transform:scale(1.05);
+}
+
+#download{
+    background:#16a34a;
+}
+
+#download:hover{
+    transform:scale(1.05);
+}
+
+/* =========================
+   BLUR EFFECT
+========================= */
+
+.blur{
+    filter:blur(12px);
+    transform:scale(1.05);
+    transition:.5s;
+}
+
+/* =========================
+   FLASH EFFECT
+========================= */
+
+.flash{
+    animation:flash .4s;
+}
+
+@keyframes flash{
+
+0%{
+    filter:brightness(1);
+}
+
+50%{
+    filter:brightness(2);
+}
+
+100%{
+    filter:brightness(1);
+}
+
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:600px){
+
+h1{
+    font-size:24px;
+}
+
+button{
+    width:100%;
+}
+
+.buttons{
+    flex-direction:column;
+}
+
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h1>📸 Foto Kita Blur</h1>
+
+    <p class="info">
+        Izinkan kamera lalu tunjukkan ✌️
+    </p>
+
+    <div class="camera-box">
+
+        <video id="video" autoplay playsinline muted></video>
+
+        <canvas id="canvas"></canvas>
+
+        <div id="status">
+            Menunggu kamera...
+        </div>
+
+    </div>
+
+    <div class="buttons">
+
+        <button id="capture">
+            📷 Ambil Foto
+        </button>
+
+        <button id="download">
+            💾 Download
+        </button>
+
+    </div>
+
+</div>
+
+<audio id="shutter">
+    <source src="assets/shutter.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const statusText = document.getElementById("status");
+
+const captureBtn = document.getElementById("capture");
+const downloadBtn = document.getElementById("download");
+const shutter = document.getElementById("shutter");
+
+const ctx = canvas.getContext("2d");
+
+// Membuka kamera
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "user"
+            },
+            audio: false
+        });
+
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+            video.play();
+            statusText.innerText = "📷 Kamera aktif";
+        };
+
+    } catch (err) {
+        console.error(err);
+        statusText.innerText = "❌ Kamera tidak dapat diakses";
+    }
+}
+
+startCamera();
+
+// Tombol Ambil Foto
+captureBtn.addEventListener("click", () => {
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.drawImage(video, 0, 0);
+
+    canvas.style.display = "block";
+    video.style.display = "none";
+
+    canvas.classList.add("blur");
+
+    if (shutter) {
+        shutter.play();
+    }
+
+    statusText.innerText = "🌫️ Foto berhasil diambil";
+
+});
+
+// Tombol Download
+downloadBtn.addEventListener("click", () => {
+
+    const link = document.createElement("a");
+
+    link.download = "foto-kita.png";
+
+    link.href = canvas.toDataURL("image/png");
+
+    link.click();
+
+});
+
+const video=document.getElementById("video");
+
+// dst
+
+</script>
+
+</body>
